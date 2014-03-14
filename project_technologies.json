@@ -1,16 +1,6 @@
 {
-    "technologies": {
-        "apis": [
-            "insert apis"
-        ],
-        "platforms": [
-            "insert platforms"
-        ],
-        "toolkits": [
-            "insert toolkits"
-        ]
-    },
+    "technologies": {},
     "themes": [
-        "insert themes"
+        "Image Manipulation"
     ]
 }
