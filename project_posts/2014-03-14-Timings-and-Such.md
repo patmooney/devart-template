@@ -1,6 +1,6 @@
 # Speed improvements and other ideas
 
-Ideally I'd like to get the overall processing time down as low as possible
+Ideally I'd like to get the overall processing time down as low as possible.
 
 ![Timing](../project_images/timings.png?raw=true "Timings")
 
