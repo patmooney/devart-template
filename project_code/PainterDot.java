@@ -11,7 +11,7 @@ public class PainterDot implements Painter {
     }
     public void paintTile ( BufferedImage off_Image, ArrayList<PixelGroup> apgr, int xOffset, int yOffset ){
 
-        int radius = 20;
+        int radius = 5;
         int spacing = radius;
 
         BufferedImage solidImage = new BufferedImage(this.w, this.h, BufferedImage.TYPE_INT_ARGB);
