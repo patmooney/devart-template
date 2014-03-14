@@ -1,10 +1,13 @@
 #!/bin/bash
 
+mkdir build
 javac $1.java -d build/
-echo "Main-Class: ImageAnalyzer" > build/Manifest.txt
+echo "Main-Class: ImageAnalyze" > build/Manifest.txt
 cd build/
 
 jar cfm PopArt.jar Manifest.txt *
 
 mv PopArt.jar ../
 rm * -rf
+cd ../
+rm -rf build/

@@ -46,9 +46,12 @@ public class PainterDot implements Painter {
             for ( int y = (int)(sY - ( radius / 2 ) ); y <= (int)(sY + ( radius / 2 ) ); y++ ){
                 if ( y < 0 || y > this.h ) continue;
                 double dist = this._dist( x, y, sX, sY );
+//                double pc = radius / dist; <-- makes a strange oreo cookie type pattern in the circle???
+                double pc = 1;
                 if ( dist < (( radius * 1.0 ) / 2) ){
                     try { 
                         bi.setRGB( xOff+x, yOff+y, pixel );
+//                        bi.setRGB( xOff+x, yOff+y, this.alphaPixel( new PixelPrim( 0, 0, pixel ), (int)(255 * pc)  ));
                     } catch ( Exception e ){}
                 }
             }
@@ -60,5 +63,12 @@ public class PainterDot implements Painter {
                     Math.pow( x1 - x2, 2 ) +
                     Math.pow( y1 - y2, 2 ) 
                 ));
+    }
+    private int alphaPixel ( PixelPrim p, int alpha ) {
+        int colour = ((alpha & 0xFF) << 24) |
+            ((p.red & 0xFF) << 16) |
+            ((p.green & 0xFF) << 8) |
+            ((p.blue & 0xFF) << 0);
+        return colour;
     }
 }

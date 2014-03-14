@@ -18,7 +18,14 @@ public class ImageAnalyze {
 
     private int tilesAcross = 2, tilesDown = 2;
 
+    private static long START = 0;
+    private static long SPLIT = 0;
+    private static ArrayList<String> TIMES = new ArrayList<String>();
+
     public static void main( String[] args ) {
+        timing( "start" );
+        START = System.currentTimeMillis();
+        
         String fn = "image.png";
         int threshold = 50;
         if ( args.length > 0 ){
@@ -27,8 +34,12 @@ public class ImageAnalyze {
         if ( args.length > 1 ){
             threshold = Integer.parseInt( args[1] );
         }
+
+        timing( "read image" );
         ImageAnalyze ia = new ImageAnalyze( fn, threshold );
+        timing( "analyze" );
         ia.analyze();
+        timing( "finish" );
     }
     public ImageAnalyze ( String fn, int threshold ){
         this.threshold = threshold;
@@ -39,6 +50,10 @@ public class ImageAnalyze {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+    public ImageAnalyze ( BufferedImage bi, int threshold ){
+        this.threshold = threshold;
+        this.bi = bi;
     }
     public void analyze(){
         this.handlepixels( this.bi, 0, 0, this.bi.getWidth(), this.bi.getHeight() );
@@ -67,12 +82,14 @@ public class ImageAnalyze {
             System.err.println("image fetch aborted or errored");
             return;
         }
+        timing( "process pixels" );
         for (int j = 0; j < h; j++) {
             for (int i = 0; i < w; i++) {
                 handlesinglepixel(new PixelPrim( x+i, y+j, pixels[j * w + i] ));
             }
         }
 
+        timing( "colour calc" );
         BufferedImage off_Image = new BufferedImage(w*tilesAcross, h*tilesDown, BufferedImage.TYPE_INT_ARGB);
 
         Collections.sort( this.pixelGroups, new CustomComparator() );
@@ -97,6 +114,7 @@ public class ImageAnalyze {
 
         int xOffset=0,yOffset=0;
         for ( int tid = 0; tid < ( tilesAcross * tilesDown ); tid++ ){
+            timing( "draw out" );
             this.painter.paintTile( off_Image, this.pixelGroups, xOffset * w, yOffset * h );
             xOffset++;
             if ( xOffset >= tilesAcross ){
@@ -105,16 +123,38 @@ public class ImageAnalyze {
             }
         }
 
+        timing( "write image" );
         try {
             // retrieve image
             File outputfile = new File("/tmp/patimageout.png");
             ImageIO.write(off_Image, "png", outputfile);
         } catch (Exception e) {
-        }
-        
 
+        }
     }
 
+    private static void timing ( String text ){
+        long NOW = System.currentTimeMillis();
+        
+        if ( START == 0 ) START = NOW;
+        if ( SPLIT == 0 ) SPLIT = NOW;
+
+        long timeFromStart = NOW - START;
+        long timeFromSplit = NOW - SPLIT;
+        
+        SPLIT = NOW;
+
+        TIMES.add( timeFromSplit + "\nTIME - " + text + ": " + timeFromStart + " - " );
+
+        if ( text.compareTo("finish") == 0 ){
+            System.out.print("\n\n----- TIMINGS -----\n");
+            for ( String line : TIMES ){
+                System.out.print(line);
+            }
+            System.out.print("\n\n");
+        }
+
+    }
 
     public class CustomComparator implements Comparator<PixelGroup> {
         @Override
