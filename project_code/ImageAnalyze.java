@@ -27,7 +27,7 @@ public class ImageAnalyze {
         START = System.currentTimeMillis();
 
         String fn = "image.png";
-        int threshold = 50;
+        int threshold = 10;
         if ( args.length > 0 ){
             fn = args[0];
         }

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.awt.Color;
 import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 
 public class PainterAnsii implements Painter {
     private int w,h;
@@ -43,11 +44,12 @@ public class PainterAnsii implements Painter {
         }
 
         try {
-            PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
+//            PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter( new OutputStreamWriter(System.out) );
             int spacing = (int)(w / 100);
             String previousColour = "";
 
-            for ( int j = 0; j < h; j+= (spacing) ) {
+            for ( int j = 0; j < h; j+= (spacing+2) ) {
                 for ( int i = 0; i < w; i+= (spacing) ) {
                     String newColour = this.ansiiColour( pixels[j * w + i] );
                     if ( newColour.compareTo( previousColour ) != 0 ){
