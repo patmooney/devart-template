@@ -2,17 +2,42 @@ import java.util.ArrayList;
 import java.awt.image.ImageObserver;
 import java.awt.image.PixelGrabber;
 import java.awt.image.BufferedImage;
+import java.awt.Image;
+import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.awt.Color;
 import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
+import javax.imageio.ImageIO;
+import java.io.File;
 
 public class PainterAnsii implements Painter {
     private int w,h;
-
     HashMap<Integer,PixelPrim> ansiiMap;
+
+    public static void main ( String[] args ){
+
+        String fn = "image.png";
+        int threshold = 10;
+        if ( args.length > 0 ){
+            fn = args[0];
+        }
+
+        BufferedImage bi = null;
+        try {
+            bi = ImageIO.read( new File( fn ) );
+            bi = resize( bi, 400 );
+        }
+        catch ( Exception e ){
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        PainterAnsii pa = new PainterAnsii( bi.getWidth(), bi.getHeight() );
+        pa.toAnsii( bi );
+    }
 
     public PainterAnsii ( int w, int h ){
         this.w = w;
@@ -20,7 +45,6 @@ public class PainterAnsii implements Painter {
     }
 
     public void paintTile ( BufferedImage off_Image, ArrayList<PixelGroup> apgr, int xOffset, int yOffset ){
-
         BufferedImage solidImage = new BufferedImage(this.w, this.h, BufferedImage.TYPE_INT_ARGB);
 
         for ( PixelGroup pgr : apgr ){
@@ -29,6 +53,11 @@ public class PainterAnsii implements Painter {
                 solidImage.setRGB( xOffset+pp.x, yOffset+pp.y, colour );
             }
         }
+
+        this.toAnsii( solidImage );
+    }
+
+    private void toAnsii( BufferedImage solidImage ){
 
         int[] pixels = new int[w * h];
         PixelGrabber pg = new PixelGrabber(solidImage, 0, 0, w, h, pixels, 0, w);
@@ -46,11 +75,15 @@ public class PainterAnsii implements Painter {
         try {
 //            PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
             PrintWriter writer = new PrintWriter( new OutputStreamWriter(System.out) );
-            int spacing = (int)(w / 100);
+            int spacingW = (int)(w / 100);
+            int spacingH = (int)(w / 100);
+
+            System.out.println( spacingW + " - " + spacingH );
+
             String previousColour = "";
 
-            for ( int j = 0; j < h; j+= (spacing+2) ) {
-                for ( int i = 0; i < w; i+= (spacing) ) {
+            for ( int j = 0; j < h; j+= (spacingH) ) {
+                for ( int i = 0; i < w; i+= (spacingW) ) {
                     String newColour = this.ansiiColour( pixels[j * w + i] );
                     if ( newColour.compareTo( previousColour ) != 0 ){
                         writer.print( newColour );
@@ -199,6 +232,27 @@ public class PainterAnsii implements Painter {
             Math.pow(((pixelTwo.blue * 1.0) - c.getBlue()),2) +
             Math.pow(((pixelTwo.alpha * 1.0) - 1),2)),0.5);
         return (int) distance;
+    }
+
+    public static BufferedImage resize(BufferedImage img, int newW) {
+
+
+        double scale = (double)newW / (double)img.getWidth();
+        int newH = (int) ((double) img.getHeight() * scale );
+
+        System.out.println( scale + " - " + img.getHeight() );
+        newH *= 0.5;
+
+        System.out.println( newW + " - " + newH );
+
+        Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+        BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = dimg.createGraphics();
+        g2d.drawImage(tmp, 0, 0, null);
+        g2d.dispose();
+
+        return dimg;
     }
 
 }
