@@ -16,7 +16,7 @@ public class ImageAnalyze {
     private int threshold = 50;
     private Painter painter;
 
-    private int tilesAcross = 2, tilesDown = 2;
+    private int tilesAcross = 1, tilesDown = 1;
 
     private static long START = 0;
     private static long SPLIT = 0;
@@ -25,7 +25,7 @@ public class ImageAnalyze {
     public static void main( String[] args ) {
         timing( "start" );
         START = System.currentTimeMillis();
-        
+
         String fn = "image.png";
         int threshold = 50;
         if ( args.length > 0 ){
@@ -110,7 +110,7 @@ public class ImageAnalyze {
         System.out.println( "======================================\n" + lowestsD + "\n\n=============================" );
         lowestsD.isBackground = true;
 
-        this.painter = new PainterDot( w, h );
+        this.painter = new PainterAnsii( w, h );
 
         int xOffset=0,yOffset=0;
         for ( int tid = 0; tid < ( tilesAcross * tilesDown ); tid++ ){
