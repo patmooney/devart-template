@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.awt.Color;
+import java.io.PrintWriter;
 
 public class PainterAnsii implements Painter {
     private int w,h;
@@ -41,19 +42,28 @@ public class PainterAnsii implements Painter {
             return;
         }
 
-        int spacing = (int)(w / 40);
-        String previousColour = "";
+        try {
+            PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
+            int spacing = (int)(w / 100);
+            String previousColour = "";
 
-        for ( int j = 0; j < h; j+= spacing ) {
-            for ( int i = 0; i < w; i+= spacing ) {
-                String newColour = this.ansiiColour( pixels[j * w + i] );
-                if ( newColour.compareTo( previousColour ) != 0 ){
-                    System.out.print( newColour );
-                    previousColour = newColour;
+            for ( int j = 0; j < h; j+= (spacing) ) {
+                for ( int i = 0; i < w; i+= (spacing) ) {
+                    String newColour = this.ansiiColour( pixels[j * w + i] );
+                    if ( newColour.compareTo( previousColour ) != 0 ){
+                        writer.print( newColour );
+                        previousColour = newColour;
+                    }
+                    writer.print( "▄" );
                 }
-                System.out.print( "▄" );
+                writer.println("\033[49m");
+                previousColour = "";
             }
-            System.out.println();
+
+            writer.close();
+        }
+        catch ( Exception e ){
+            e.printStackTrace();
         }
     }
 
@@ -176,7 +186,7 @@ public class PainterAnsii implements Painter {
             }
         }
 
-        return String.format("\033[38;5;%dm", closestColour);
+        return String.format("\033[48;5;%dm\033[38;5;%dm", closestColour, closestColour);
     }
 
     private int dist( int pixel, PixelPrim pixelTwo ) {
