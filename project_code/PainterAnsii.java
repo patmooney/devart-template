@@ -94,7 +94,6 @@ public class PainterAnsii implements Painter {
             String previousColour = "";
             String line = "";
             for ( int j = 0; j < h; j+= (spacing) ) {
-                line = "";
                 for ( int i = 0; i < w; i+= (spacing) ) {
                     String newColour = this.ansiiColour( pixels[j * w + i] );
                     if ( newColour.compareTo( previousColour ) != 0 ){
@@ -105,25 +104,26 @@ public class PainterAnsii implements Painter {
                 }
                 lines.add( line + "\033[0m" );
                 previousColour = "";
+                line = "";
             }
 
+/*
             int minMargin = 0;
             for ( String l : lines ) {
                 if ( l.length() < 4 ) { continue; }
                 if ( l.substring(0,4).compareTo("\033[0m") != 0 ){
                     minMargin = 0; break;
                 }
-                l = l.substring(4);
                 int count = getMargin( l );
                 if ( minMargin == 0 || count < minMargin ) {
                     minMargin = count;
                 }
             }
-
+*/
             PrintWriter writer = new PrintWriter( new OutputStreamWriter(System.out) );
             for ( String l : lines ) {
-                String noMargin = l.substring( minMargin );
-                writer.println( "\033[0m" + noMargin );
+//              String noMargin = l.substring( minMargin );
+                writer.println( l );
             }
             writer.close();
         }
