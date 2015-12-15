@@ -20,9 +20,24 @@ public class PainterAnsii implements Painter {
     public static void main ( String[] args ){
 
         String fn = "image.png";
-        int threshold = 10;
+        int resolution = 100;
+
         if ( args.length > 0 ){
             fn = args[0];
+        }
+        else {
+            System.out.println( "\nUsage: java -jar ansii.jar <image.png/jpg> <resolution ( default 100 )>\n" );
+            System.exit( 0 );
+        }
+
+        if ( args.length > 1 ){
+            try {
+                resolution = Integer.parseInt( args[1] );
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+                System.exit( 2 );
+            }
         }
 
         BufferedImage bi = null;
@@ -36,7 +51,7 @@ public class PainterAnsii implements Painter {
         }
 
         PainterAnsii pa = new PainterAnsii( bi.getWidth(), bi.getHeight() );
-        pa.toAnsii( bi );
+        pa.toAnsii( bi, resolution );
     }
 
     public PainterAnsii ( int w, int h ){
@@ -54,10 +69,10 @@ public class PainterAnsii implements Painter {
             }
         }
 
-        this.toAnsii( solidImage );
+        this.toAnsii( solidImage, 100 );
     }
 
-    private void toAnsii( BufferedImage solidImage ){
+    private void toAnsii( BufferedImage solidImage, int resolution ){
 
         int[] pixels = new int[w * h];
         PixelGrabber pg = new PixelGrabber(solidImage, 0, 0, w, h, pixels, 0, w);
@@ -75,23 +90,20 @@ public class PainterAnsii implements Painter {
         try {
 //            PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
             PrintWriter writer = new PrintWriter( new OutputStreamWriter(System.out) );
-            int spacingW = (int)(w / 100);
-            int spacingH = (int)(w / 100);
-
-            System.out.println( spacingW + " - " + spacingH );
+            int spacing = (int)(w / resolution);
 
             String previousColour = "";
 
-            for ( int j = 0; j < h; j+= (spacingH) ) {
-                for ( int i = 0; i < w; i+= (spacingW) ) {
+            for ( int j = 0; j < h; j+= (spacing) ) {
+                for ( int i = 0; i < w; i+= (spacing) ) {
                     String newColour = this.ansiiColour( pixels[j * w + i] );
                     if ( newColour.compareTo( previousColour ) != 0 ){
                         writer.print( newColour );
                         previousColour = newColour;
                     }
-                    writer.print( "▄" );
+                    writer.print( " " );
                 }
-                writer.println("\033[49m");
+                writer.println("\033[0m");
                 previousColour = "";
             }
 
@@ -118,6 +130,11 @@ public class PainterAnsii implements Painter {
     }
 
     public String ansiiColour ( int pixel ) {
+
+        if ( pixel == 0 ){
+            return "\033[0m";
+        }
+
         if ( this.ansiiMap == null ) {
             this.ansiiMap = new HashMap<Integer,PixelPrim>() {{
                 put(0, new PixelPrim( 0, 0, 0, 0, 0, 1 )); put(1, new PixelPrim( 0, 0, 128, 0, 0, 1 )); put(2, new PixelPrim( 0, 0, 0, 128, 0, 1 ));
@@ -213,6 +230,7 @@ public class PainterAnsii implements Painter {
         int closestColour = 0;
         Iterator it = this.ansiiMap.entrySet().iterator();
         while (it.hasNext()) {
+            @SuppressWarnings("unchecked")
             Map.Entry<Integer,PixelPrim> entry = (Map.Entry)it.next();
             int newDist = this.dist( pixel, entry.getValue() );
             if ( maxDist == null || newDist < maxDist ){
@@ -235,15 +253,10 @@ public class PainterAnsii implements Painter {
     }
 
     public static BufferedImage resize(BufferedImage img, int newW) {
-
-
         double scale = (double)newW / (double)img.getWidth();
         int newH = (int) ((double) img.getHeight() * scale );
 
-        System.out.println( scale + " - " + img.getHeight() );
         newH *= 0.5;
-
-        System.out.println( newW + " - " + newH );
 
         Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
         BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
