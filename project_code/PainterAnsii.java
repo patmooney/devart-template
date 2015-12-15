@@ -16,6 +16,7 @@ import java.io.File;
 public class PainterAnsii implements Painter {
     private int w,h;
     HashMap<Integer,PixelPrim> ansiiMap;
+    ArrayList<String> lines;
 
     public static void main ( String[] args ){
 
@@ -57,6 +58,7 @@ public class PainterAnsii implements Painter {
     public PainterAnsii ( int w, int h ){
         this.w = w;
         this.h = h;
+        this.lines = new ArrayList<String>();
     }
 
     public void paintTile ( BufferedImage off_Image, ArrayList<PixelGroup> apgr, int xOffset, int yOffset ){
@@ -88,30 +90,59 @@ public class PainterAnsii implements Painter {
         }
 
         try {
-//            PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
-            PrintWriter writer = new PrintWriter( new OutputStreamWriter(System.out) );
             int spacing = (int)(w / resolution);
-
             String previousColour = "";
-
+            String line = "";
             for ( int j = 0; j < h; j+= (spacing) ) {
+                line = "";
                 for ( int i = 0; i < w; i+= (spacing) ) {
                     String newColour = this.ansiiColour( pixels[j * w + i] );
                     if ( newColour.compareTo( previousColour ) != 0 ){
-                        writer.print( newColour );
+                        line += newColour;
                         previousColour = newColour;
                     }
-                    writer.print( " " );
+                    line += " ";
                 }
-                writer.println("\033[0m");
+                lines.add( line + "\033[0m" );
                 previousColour = "";
             }
 
+            int minMargin = 0;
+            for ( String l : lines ) {
+                if ( l.length() < 4 ) { continue; }
+                if ( l.substring(0,4).compareTo("\033[0m") != 0 ){
+                    minMargin = 0; break;
+                }
+                l = l.substring(4);
+                int count = getMargin( l );
+                if ( minMargin == 0 || count < minMargin ) {
+                    minMargin = count;
+                }
+            }
+
+            PrintWriter writer = new PrintWriter( new OutputStreamWriter(System.out) );
+            for ( String l : lines ) {
+                String noMargin = l.substring( minMargin );
+                writer.println( "\033[0m" + noMargin );
+            }
             writer.close();
         }
         catch ( Exception e ){
             e.printStackTrace();
         }
+    }
+
+    private int getMargin ( String s ){
+        int counter = 0;
+        for( int i=0; i<s.length(); i++ ) {
+            if( s.charAt(i) == ' ' ) {
+                counter++;
+            }
+            else {
+                break;
+            }
+        }
+        return counter;
     }
 
     private int alphaPixel ( PixelPrim p, int alpha ) {
